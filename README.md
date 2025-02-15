@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/b9ac9606-8fdf-4a50-9017-a48a7feb1745)
+
 Merchant Mate is an Android application developed to showcase a shopping cart system where users can browse food items, add them to a cart,
 and calculate the total price including tax. The app uses RecyclerView to display a list of food items, and Realm Database for storing and managing the cart data.
 

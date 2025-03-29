@@ -1,11 +1,10 @@
-package com.example.realmaddremovequantitycalculation.activity;
+package com.example.realmaddremovequantitycalculation.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,17 +13,18 @@ import com.example.realmaddremovequantitycalculation.Interfaces.ProductListenerI
 import com.example.realmaddremovequantitycalculation.R;
 import com.example.realmaddremovequantitycalculation.RealmClasses.ProductsRealm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AddedProductListAdapter extends RecyclerView.Adapter<AddedProductListAdapter.ViewHolder> {
     private Context context;
-    private List<ProductsRealm> products;
-    private ProductListenerInterface productListenerInterface;
+    private List<ProductsRealm> addedProducts;
+    private ProductListenerInterface listener;
 
-    public AddedProductListAdapter(Context context, List<ProductsRealm> products, ProductListenerInterface productListenerInterface) {
+    public AddedProductListAdapter(Context context, List<ProductsRealm> addedProducts, ProductListenerInterface listener) {
         this.context = context;
-        this.products = products;
-        this.productListenerInterface = productListenerInterface;
+        this.addedProducts = addedProducts;
+        this.listener = listener;
     }
 
     @Override
@@ -35,30 +35,28 @@ public class AddedProductListAdapter extends RecyclerView.Adapter<AddedProductLi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        final ProductsRealm productRealm = products.get(holder.getAdapterPosition());
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        final ProductsRealm product = addedProducts.get(position);
 
-        holder.imgProduct.setImageResource(productRealm.getProductImage());
-        holder.txtProductName.setText(productRealm.getProductName());
-        holder.txtQuantity.setText("Qty: " + productRealm.getQuantity()); // Display quantity
+        holder.imgProduct.setImageResource(product.getProductImage());
+        holder.txtProductName.setText(product.getProductName());
+        holder.txtQuantity.setText("Qty: " + product.getQuantity());
 
         holder.imgProductDelete.setOnClickListener(view -> {
-            productListenerInterface.onProductDelete(productRealm.getProductUUID(), holder.getAdapterPosition());
+            listener.onProductDelete(product.getProductUUID(), holder.getAdapterPosition());
         });
     }
 
+
+
     @Override
     public int getItemCount() {
-        return products.size();
+        return addedProducts.size();
     }
 
-    public void deleteUser(int position) {
-        if (position >= 0 && position < products.size()) {
-            products.remove(position);
-            notifyItemRemoved(position);
-        } else {
-            Log.e("AddedProductListAdapter", "Invalid position: " + position);
-        }
+    public void updateList(List<ProductsRealm> newList) {
+        this.addedProducts = new ArrayList<>(newList);
+        notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -68,7 +66,7 @@ public class AddedProductListAdapter extends RecyclerView.Adapter<AddedProductLi
         public ViewHolder(View itemView) {
             super(itemView);
             this.txtProductName = itemView.findViewById(R.id.txt_added_product_name);
-            this.txtQuantity = itemView.findViewById(R.id.tetx_quanity); // Add the quantity text view in XML
+            this.txtQuantity = itemView.findViewById(R.id.tetx_quanity);
             this.imgProduct = itemView.findViewById(R.id.added_image);
             this.imgProductDelete = itemView.findViewById(R.id.img_product_delete);
         }

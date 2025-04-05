@@ -32,45 +32,54 @@ public class ProductRepository {
     }
 
     private void insertDefaultProducts() {
-        try (Realm realm = Realm.getDefaultInstance()) {
-            realm.executeTransaction(_realm -> {
-                _realm.insert(new ProductsRealm(R.drawable.south, R.drawable.add, "South Indian Meal", 10.0, 10.0));
-                _realm.insert(new ProductsRealm(R.drawable.north, R.drawable.add, "North Indian Meal", 20.0, 10.0));
-                _realm.insert(new ProductsRealm(R.drawable.dessert, R.drawable.add, "Desserts", 30.0, 10.0));
-                _realm.insert(new ProductsRealm(R.drawable.dosa, R.drawable.add, "Masala Dosa", 40.0, 10.0));
-                _realm.insert(new ProductsRealm(R.drawable.milkshakes, R.drawable.add, "Milkshake", 50.0, 10.0));
-                _realm.insert(new ProductsRealm(R.drawable.icecream, R.drawable.add, "Ice Cream", 60.0, 10.0));
+        Realm realm = Realm.getDefaultInstance();
+        try {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm _realm) {
+                    _realm.insert(new ProductsRealm(R.drawable.south, R.drawable.add, "South Indian Meal", 10.0, 10.0));
+                    _realm.insert(new ProductsRealm(R.drawable.north, R.drawable.add, "North Indian Meal", 20.0, 10.0));
+                    _realm.insert(new ProductsRealm(R.drawable.dessert, R.drawable.add, "Desserts", 30.0, 10.0));
+                    _realm.insert(new ProductsRealm(R.drawable.dosa, R.drawable.add, "Masala Dosa", 40.0, 10.0));
+                    _realm.insert(new ProductsRealm(R.drawable.milkshakes, R.drawable.add, "Milkshake", 50.0, 10.0));
+                    _realm.insert(new ProductsRealm(R.drawable.icecream, R.drawable.add, "Ice Cream", 60.0, 10.0));
+                }
             });
+        } finally {
+            realm.close();
         }
     }
 
     public void addProduct(ProductsRealm product) {
         try (Realm realm = Realm.getDefaultInstance()) {
-            realm.executeTransaction(_realm -> {
-                ProductsRealm existingProduct = _realm.where(ProductsRealm.class)
-                        .equalTo("productUUID", product.getProductUUID())
-                        .findFirst();
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm _realm) {
+                    ProductsRealm existingProduct = _realm.where(ProductsRealm.class)
+                            .equalTo("productUUID", product.getProductUUID())
+                            .findFirst();
 
-                if (existingProduct != null) {
-                    existingProduct.incrementQuantity();
-                } else {
-                    product.setQuantity(1);
-                    _realm.insertOrUpdate(product);
+                    if (existingProduct != null) {
+                        existingProduct.incrementQuantity();
+                    } else {
+                        product.setQuantity(1);
+                        _realm.insertOrUpdate(product);
+                    }
+
+                    RealmResults<ProductsRealm> allProducts = realm.where(ProductsRealm.class).findAll();
+                    List<ProductsRealm> addedList = new ArrayList<>();
+
+                    for (int i = 0; i < allProducts.size(); i++) {
+                        ProductsRealm products = allProducts.get(i);
+                        if (products.getQuantity() > 0) {
+                            addedList.add(realm.copyFromRealm(products));
+                        }
+                    }
+                    addedProductList.postValue(addedList);
                 }
-
-                List<ProductsRealm> updatedList = new ArrayList<>(addedProductList.getValue());
-                ProductsRealm updatedProduct = findProductByUUID(product.getProductUUID(), updatedList);
-
-                if (updatedProduct != null) {
-                    updatedProduct.incrementQuantity();
-                } else {
-                    updatedList.add(product);
-                }
-                addedProductList.setValue(updatedList);
             });
         }
     }
-
 
 
     public void deleteProduct(String productUUID) {
@@ -86,15 +95,6 @@ public class ProductRepository {
             }
         }
         addedProductList.postValue(currentList);
-    }
-
-    private ProductsRealm findProductByUUID(String productUUID, List<ProductsRealm> productList) {
-        for (ProductsRealm product : productList) {
-            if (product.getProductUUID().equals(productUUID)) {
-                return product;
-            }
-        }
-        return null;
     }
 }
 

@@ -83,18 +83,43 @@ public class ProductRepository {
 
 
     public void deleteProduct(String productUUID) {
-        List<ProductsRealm> currentList = addedProductList.getValue();
-        for (ProductsRealm product : currentList) {
-            if (product.getProductUUID().equals(productUUID)) {
-                if (product.getQuantity() > 1) {
-                    product.decrementQuantity();
-                } else {
-                    currentList.remove(product);
+        Realm realm = Realm.getDefaultInstance();
+        try {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm _realm) {
+                    ProductsRealm product = _realm.where(ProductsRealm.class)
+                            .equalTo("productUUID", productUUID)
+                            .findFirst();
+
+                    if (product != null) {
+                        if (product.getQuantity() > 1) {
+                            product.decrementQuantity();
+                        } else {
+                            product.deleteFromRealm();
+                        }
+                    }
                 }
-                break;
-            }
+            });
+        } finally {
+            realm.close();
         }
-        addedProductList.postValue(currentList);
+
+        List<ProductsRealm> currentList = addedProductList.getValue();
+        if (currentList != null) {
+            for (int i = 0; i < currentList.size(); i++) {
+                ProductsRealm product = currentList.get(i);
+                if (product.getProductUUID().equals(productUUID)) {
+                    if (product.getQuantity() > 1) {
+                        product.decrementQuantity();
+                    } else {
+                        currentList.remove(i);
+                    }
+                    break;
+                }
+            }
+            addedProductList.postValue(currentList);
+        }
     }
 }
 

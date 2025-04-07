@@ -32,8 +32,8 @@ public class ProductRepository {
     }
 
     private void insertDefaultProducts() {
-        Realm realm = Realm.getDefaultInstance();
-        try {
+
+        try (Realm realm = Realm.getDefaultInstance()){
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm _realm) {
@@ -45,8 +45,8 @@ public class ProductRepository {
                     _realm.insert(new ProductsRealm(R.drawable.icecream, R.drawable.add, "Ice Cream", 60.0, 10.0));
                 }
             });
-        } finally {
-            realm.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -58,14 +58,12 @@ public class ProductRepository {
                     ProductsRealm existingProduct = _realm.where(ProductsRealm.class)
                             .equalTo("productUUID", product.getProductUUID())
                             .findFirst();
-
                     if (existingProduct != null) {
                         existingProduct.incrementQuantity();
                     } else {
                         product.setQuantity(1);
                         _realm.insertOrUpdate(product);
                     }
-
                     RealmResults<ProductsRealm> allProducts = realm.where(ProductsRealm.class).findAll();
                     List<ProductsRealm> addedList = new ArrayList<>();
 

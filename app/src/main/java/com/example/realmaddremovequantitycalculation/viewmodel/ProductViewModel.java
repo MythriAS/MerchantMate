@@ -16,10 +16,14 @@ public class ProductViewModel extends ViewModel {
     private MutableLiveData<List<ProductsRealm>> addedProductList = new MutableLiveData<>(new ArrayList<>());
     private MutableLiveData<Totals> totalsLiveData = new MutableLiveData<>();
 
-    private final Observer<List<ProductsRealm>> addedProductObserver = products -> {
-        addedProductList.setValue(products);
-        calculateTotals(products);
+    private final Observer<List<ProductsRealm>> addedProductObserver = new Observer<List<ProductsRealm>>() {
+        @Override
+        public void onChanged(List<ProductsRealm> products) {
+            addedProductList.setValue(products);
+            calculateTotals(products);
+        }
     };
+
     public ProductViewModel() {
         repository = new ProductRepository();
         repository.getAddedProductList().observeForever(addedProductObserver);

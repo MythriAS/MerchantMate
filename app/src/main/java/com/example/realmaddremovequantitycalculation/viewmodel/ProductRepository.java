@@ -32,7 +32,6 @@ public class ProductRepository {
     }
 
     private void insertDefaultProducts() {
-
         try (Realm realm = Realm.getDefaultInstance()){
             realm.executeTransaction(new Realm.Transaction() {
                 @Override

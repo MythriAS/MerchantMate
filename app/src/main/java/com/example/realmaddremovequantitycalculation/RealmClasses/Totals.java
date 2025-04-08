@@ -1,4 +1,4 @@
-package com.example.realmaddremovequantitycalculation;
+package com.example.realmaddremovequantitycalculation.RealmClasses;
 
 public class Totals {
     public int totalQty;

@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.realmaddremovequantitycalculation.Interfaces.ProductListenerInterface;
 import com.example.realmaddremovequantitycalculation.R;
 import com.example.realmaddremovequantitycalculation.RealmClasses.ProductsRealm;
-import com.example.realmaddremovequantitycalculation.Totals;
+import com.example.realmaddremovequantitycalculation.RealmClasses.Totals;
 import com.example.realmaddremovequantitycalculation.viewmodel.ProductViewModel;
 
 import java.util.List;
